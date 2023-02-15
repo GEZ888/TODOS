@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet">
+    <title>Lesson24</title>
+</head>
+<body>
+  <header class="header">TODOS</header>
+
+<div class="container">
+
+  <form class="form">
+    <input type="text" class="todo-input" placeholder="Запиши задачи" /><br>
+  </form>
+
+</div>
+
+
+<ul class="todo-list"></ul>
+
+  <script>
+
+const form = document.querySelector('.form');
+const list = document.querySelector('.todo-list');
+const input = document.querySelector('.todo-input');
+
+let todoItems = [];
+
+form.addEventListener('submit', function(event) {
+event.preventDefault();
+const inputValue = input.value.trim();
+
+
+if (inputValue !== '') {
+  addTodoItem(inputValue);
+  input.value = '';
+}
+});
+
+function addTodoItem(text) {
+  const todo = {
+    id: Date.now(),
+    taskName: text,
+    done: false,
+  };
+  todoItems.push(todo);
+  localStorage.setItem('task', JSON.stringify(todo));
+  renderItem(todo);
+}
+
+function deleteTodoItem(event) {
+  const key = event.target.parentElement.dataset.key;
+    
+  const index = todoItems.findIndex((item) => item.id === Number(key));
+  
+  console.log("Index", index);
+
+  const todo = {
+    deleted: true,
+    ...todoItems[index],
+  };
+  todoItems = todoItems.filter((item) => item.id !== Number(key));
+  renderItem(todo);
+  }
+
+
+function toggleTodoItem(event) {
+  
+  const key = event.target.parentElement.dataset.key;
+  const index = todoItems.findIndex(function (item) {
+    return item.id === Number(key);
+  }); 
+  todoItems[index].done = !todoItems[index].done;
+  renderItem(todoItems[index]);
+}
+
+
+
+function renderItem(newTodoItem) {
+  localStorage.setItem('tasks', JSON.stringify(todoItems));
+  const item = document.querySelector(`[data-key='${newTodoItem.id}']`);
+  
+let isDone = '';
+
+if (newTodoItem.deleted) {
+  item.remove();
+  return;
+} 
+
+if (newTodoItem.done) {
+  isDone = 'todo-item-done';
+}
+
+  const li = document.createElement('li');
+  li.setAttribute('class', 'todo-item');
+  li.setAttribute('data-key', newTodoItem.id);
+  li.innerHTML = `<span class='${isDone}' onclick="toggleTodoItem(event)">${newTodoItem.taskName}</span>
+    <button onclick="deleteTodoItem(event)">Удалить</button>`;
+
+if (item) {
+  list.replaceChild(li, item);
+} else {
+  list.append(li);
+}
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  const items = localStorage.getItem('tasks');
+  
+  if (items) {
+    todoItems = JSON.parse(items);
+
+    for(let i = 0; i < todoItems.length; i++) {
+      renderItem(todoItems[i]);
+    }
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+  </script>
+   
+</body>
+</html>
